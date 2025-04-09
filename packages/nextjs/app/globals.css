@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 224 76% 48%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 224 76% 48%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 224 76% 48%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224 76% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.bg-grid-white {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.05)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+}
+
+
+
+/* 
+@layer base {
+  * {
+    border: 1px solid var(--border);
+  }
+  body {
+    background-color: var(--background);
+    color: white;
+  }
+} */
+
+.bg-grid-white {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.05)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+}
+
+/* .wallet-button {
+  @apply flex flex-col items-center mr-1 btn btn-primary !important;
+} */
+
+.wallet-modal-title {
+  text-align: center;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 32px;
+}
+
+.aptos-connect-privacy-policy-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.aptos-connect-privacy-policy-text {
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.aptos-connect-privacy-policy-link {
+  color: rgba(0, 0, 0, 0.5);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.aptos-connect-privacy-policy-link:hover {
+  text-decoration: underline;
+}
+
+.aptos-connect-powered-by {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+  line-height: 20px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.wallet-menu-wrapper {
+  display: flex;
+  justify-content: space-between;
+  font-size: 20px;
+  border: solid 1px;
+  border-color: rgba(0, 0, 0, 0.1);
+  padding-inline: 16px;
+  padding-block: 12px;
+  border-radius: 8px;
+}
+
+.wallet-name-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.wallet-selector-icon {
+  height: 24px;
+  width: 24px;
+  margin-right: 12px;
+}
+
+.wallet-selector-text {
+  font-size: 14px;
+}
+
+/* .wallet-connect-button {
+  @apply flex flex-col items-center btn btn-secondary;
+}
+
+.wallet-connect-install {
+  @apply flex flex-col items-center mr-1 btn btn-secondary;
+} */
+
+/* Scoped Ant CSS overrides */
+
+:where(.wallet-selector-modal .ant-modal-body) {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+:where(.wallet-selector-modal .ant-divider-inner-text) {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+:where(.wallet-selector-modal .ant-collapse-header) {
+  justify-content: center !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+:where(.wallet-selector-modal .ant-collapse-header-text) {
+  flex: unset !important;
+  margin-inline-end: 0 !important;
+}
+
+:where(.wallet-selector-modal .ant-collapse-content-box) {
+  padding: 0px !important;
+  padding-top: 8px !important;
+}
+

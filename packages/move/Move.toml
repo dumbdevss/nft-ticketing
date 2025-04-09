@@ -1,0 +1,17 @@
+[package]
+name = "NFT Ticketing"
+version = "1.0.0"
+authors = ["Taiwo Triumphant"]
+upgrade_policy="compatible"
+
+
+[dependencies]
+AptosFramework = { git = "https://github.com/movementlabsxyz/aptos-core.git", subdir = "aptos-move/framework/aptos-framework", rev = "movement" }
+AptosStdlib = { git = "https://github.com/movementlabsxyz/aptos-core.git", subdir = "aptos-move/framework/aptos-stdlib", rev = "movement" }
+MoveStdlib = { git = "https://github.com/movementlabsxyz/aptos-core.git", subdir = "aptos-move/framework/move-stdlib", rev = "movement" }
+AptosToken = { git = "https://github.com/movementlabsxyz/aptos-core.git", subdir = "aptos-move/framework/aptos-token", rev = "movement" }
+AptosTokenObjects = { git = "https://github.com/movementlabsxyz/aptos-core.git", subdir = "aptos-move/framework/aptos-token-objects", rev = "movement" }
+
+
+[addresses]
+ticket_nft = ""
