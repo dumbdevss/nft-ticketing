@@ -36,6 +36,20 @@ export default function Home() {
               <span className="font-bold">1,000+</span> tickets minted this month
             </p>
           </div>
+
+          <div className="mt-8 flex items-center justify-center gap-4">
+            <Button variant="outline">
+              <Link href="/events" className="flex items-center gap-2">
+                But Ticket
+              </Link>
+            </Button>
+
+            <Button>
+              <Link href="/validate" className="flex items-center gap-2">
+                Validate Ticket
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 
