@@ -1,6 +1,7 @@
 import type React from "react"
 import "~~/app/globals.css"
 import { ThemeProvider } from "~~/components/theme-provider"
+import { Toaster } from "~~/components/ui/toaster";
 import { ScaffoldMoveAppWithProviders } from "~~/components/ScaffoldMoveAppWithProviders";
 
 export const metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <ScaffoldMoveAppWithProviders>
             {children}
+            <Toaster />
           </ScaffoldMoveAppWithProviders>
         </ThemeProvider>
       </body>
