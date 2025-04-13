@@ -182,7 +182,7 @@ export default function EventsPage() {
             <img
               src={event.image}
               alt={event.name}
-              className="object-cover"
+              className="object-cover w-full h-full"
             />
           </div>
           <div className="flex flex-col flex-grow">
