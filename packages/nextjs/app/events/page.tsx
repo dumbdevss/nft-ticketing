@@ -52,7 +52,7 @@ export default function EventsPage() {
       // Create dummy events if none exist
       const dummyEvents: Event[] = [
         {
-          id: nanoid(),
+          id:"1",
           name: "Web3 Conference 2025",
           date: "May 15, 2025",
           location: "San Francisco, CA",
@@ -65,7 +65,7 @@ export default function EventsPage() {
           price: "1 MOVE"
         },
         {
-          id: nanoid(),
+          id:"2",
           name: "Blockchain Summit",
           date: "June 22, 2025",
           location: "New York, NY",
@@ -77,7 +77,7 @@ export default function EventsPage() {
           price: "1 MOVE"
         },
         {
-          id: nanoid(),
+          id:"3",
           name: "ETH Global Hackathon",
           date: "July 10, 2025",
           location: "Berlin, Germany",
@@ -89,7 +89,7 @@ export default function EventsPage() {
           price: "1 MOVE"
         },
         {
-          id: nanoid(),
+          id: "4",
           name: "DeFi Conference",
           date: "August 5, 2025",
           location: "Singapore",
@@ -102,7 +102,7 @@ export default function EventsPage() {
           price: "1 MOVE"
         },
         {
-          id: nanoid(),
+          id:"5",
           name: "NFT Exhibition",
           date: "September 18, 2025",
           location: "London, UK",
