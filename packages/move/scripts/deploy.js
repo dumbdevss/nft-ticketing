@@ -60,13 +60,11 @@ async function main() {
 
   // Add assume-yes flag
   deployCommand += ' --assume-yes';
-  deployCommand = platform === 'movement' && 'movement move publish';
 
   try {
     // Execute deploy command
     console.log(`Executing (${platform}): ${deployCommand}`);
     execSync(deployCommand, { stdio: 'inherit' });
-
   } catch (error) {
     console.error(`Deployment failed (${platform}):`, error.message);
     process.exit(1);
