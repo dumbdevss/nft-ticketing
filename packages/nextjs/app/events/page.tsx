@@ -9,6 +9,9 @@ import { RadioGroup, RadioGroupItem } from '~~/components/ui/radio-group';
 import { Label } from '~~/components/ui/label';
 import Image from 'next/image';
 import Navbar from '~~/components/navbar';
+import useSubmitTransaction from '~~/hooks/scaffold-move/useSubmitTransaction';
+import { useWallet } from '@aptos-labs/wallet-adapter-react';
+import { useToast } from '~~/hooks/use-toast';
 
 // Define TypeScript interfaces
 interface Event {
@@ -44,6 +47,10 @@ export default function EventsPage() {
   
   const [selectedTicketTypes, setSelectedTicketTypes] = useState<Record<string, string>>({});
 
+  const { submitTransaction, transactionResponse, transactionInProcess } = useSubmitTransaction("ticketing");
+  const { account } = useWallet();
+  const {toast} = useToast();
+
   useEffect(() => {
     // Check if events exist in localStorage
     const storedEvents = localStorage.getItem('events');
@@ -52,63 +59,63 @@ export default function EventsPage() {
       // Create dummy events if none exist
       const dummyEvents: Event[] = [
         {
-          id: nanoid(),
+          id: "1",
           name: "Web3 Conference 2025",
           date: "May 15, 2025",
           location: "San Francisco, CA",
           ticketTypes: [
-            { type: "transferrable", price: "1 MOVE" },
-            { type: "soulbound", price: "1 MOVE" }
+        { type: "transferrable", price: "1 MOVE" },
+        { type: "soulbound", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreihagbrmpnhs3pom7h6n44j35ozxcjpfv4bnnqcqlnkmzs3jpjfrvq",
           tokenId: "1234",
           price: "1 MOVE"
         },
         {
-          id: nanoid(),
+          id: "2",
           name: "Blockchain Summit",
           date: "June 22, 2025",
           location: "New York, NY",
           ticketTypes: [
-            { type: "soulbound", price: "1 MOVE" }
+        { type: "soulbound", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreibg7ptr5pstg4ow4iyq2uublhichscosqnhaiepyyv6wudrgr6uxy",
           tokenId: "5678",
           price: "1 MOVE"
         },
         {
-          id: nanoid(),
+          id: "3",
           name: "ETH Global Hackathon",
           date: "July 10, 2025",
           location: "Berlin, Germany",
           ticketTypes: [
-            { type: "transferrable", price: "1 MOVE" }
+        { type: "transferrable", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreib6wskjwqcumwwaboyptk2awizubpj5jec7yuai45ochb2n6yt5f4",
           tokenId: "9101",
           price: "1 MOVE"
         },
         {
-          id: nanoid(),
+          id: "4",
           name: "DeFi Conference",
           date: "August 5, 2025",
           location: "Singapore",
           ticketTypes: [
-            { type: "transferrable", price: "1 MOVE" },
-            { type: "soulbound", price: "1 MOVE" }
+        { type: "transferrable", price: "1 MOVE" },
+        { type: "soulbound", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreigmw3cz7lj63763d35bc6656imy2vnllhxgjzwdgwimgzgg4o2k3i",
           tokenId: "1121",
           price: "1 MOVE"
         },
         {
-          id: nanoid(),
+          id: "5",
           name: "NFT Exhibition",
           date: "September 18, 2025",
           location: "London, UK",
           ticketTypes: [
-            { type: "transferrable", price: "1 MOVE" },
-            { type: "soulbound", price: "1 MOVE" }
+        { type: "transferrable", price: "1 MOVE" },
+        { type: "soulbound", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreiejbp6xr2wqryvbi7gl52vtwx7i44fmpn2r6pd2z53ca7dmjmydlq",
           tokenId: "3141",
@@ -147,24 +154,40 @@ export default function EventsPage() {
     }));
   };
 
-  const handleBuyTicket = (event: Event) => {
+  const handleBuyTicket = async (event: Event) => {
     const selectedType = selectedTicketTypes[event.id];
     const ticketTypeInfo = event.ticketTypes.find(t => t.type === selectedType);
-    
+  
     if (!ticketTypeInfo) return;
-    
+  
     // Simulate buying a ticket by adding to recent activity
     const newActivity = {
       action: "Minted",
       ticket: event.name,
-      ticketType: selectedType === 'transferrable' ? 'Transferrable' : 'Soulbound',
-      time: "Just now"
+      ticketType: selectedType === "transferrable" ? "Transferrable" : "Soulbound",
+      time: "Just now",
     };
-
+  
     setRecentActivity([newActivity, ...recentActivity.slice(0, 2)]);
+  
+    // Handle NFT minting based on selectedType
+    const transactionType =
+      selectedType === "transferrable"
+        ? "mint_transferable_ticket"
+        : "mint_soulbound_ticket";
+        
+    await submitTransaction(transactionType, [
+      parseInt(event.id),
+      "nothing",
+      `${event.name} ticket for user ${account?.address}`,
+      "http://ticket.com",
+    ]);
 
-    // You would also handle the actual NFT minting here
-    alert(`Purchasing ${selectedType} ticket for ${event.name} at ${ticketTypeInfo.price}`);
+    toast({
+      title: "Purchasing Ticket",
+      description: `Purchasing ${selectedType} ticket for ${event.name} at ${ticketTypeInfo.price}`,
+      duration: 5000,
+    });
   };
 
   return (

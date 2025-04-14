@@ -1,6 +1,5 @@
 module ticket_nft::ticketing {
     use std::error;
-    use std::error;
     use std::signer;
     use std::vector;
     use std::string::{Self, String};

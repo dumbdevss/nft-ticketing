@@ -14,4 +14,4 @@ AptosTokenObjects = { git = "https://github.com/movementlabsxyz/aptos-core.git",
 
 
 [addresses]
-ticket_nft = "0x59b41e7a75b59213dd30cea752f8ae8bac40b8162736782aca71e24be0840acd"
+ticket_nft = "0x07e20f2390f2068039e83d63390c95e62c116b98b1a8b872aa153938d491a6de"

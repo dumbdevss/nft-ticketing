@@ -5,7 +5,7 @@
   import { GenericModulesDeclaration } from "~~/utils/scaffold-move/module";
 
   const externalModules = {
-    250:{},
+    2:{},250:{},
   } as const;
 
   export default externalModules satisfies GenericModulesDeclaration;
