@@ -1,5 +1,6 @@
 module ticket_nft::ticketing {
     use std::error;
+    use std::error;
     use std::signer;
     use std::vector;
     use std::string::{Self, String};
@@ -368,7 +369,8 @@ module ticket_nft::ticketing {
 
     #[view]
     public fun get_ticket_count(): u64 acquires TicketState {
-        let state = borrow_global<TicketState>(@ticket_nft);
+        let resurce_address = get_resource_address(@ticket_nft);
+        let state = borrow_global<TicketState>(resurce_address);
         state.ticket_counter
     }
 
