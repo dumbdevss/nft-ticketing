@@ -180,7 +180,7 @@ export default function EventsPage() {
       parseInt(event.id),
       "nothing",
       `${event.name} ticket for user ${account?.address}`,
-      "http://ticket.com",
+      `${event.image}`,
     ]);
 
     toast({
