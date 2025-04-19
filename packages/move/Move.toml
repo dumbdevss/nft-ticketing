@@ -8,10 +8,8 @@ upgrade_policy="compatible"
 [dependencies]
 AptosFramework = { git = "https://github.com/movementlabsxyz/aptos-core.git", subdir = "aptos-move/framework/aptos-framework", rev = "movement" }
 AptosStdlib = { git = "https://github.com/movementlabsxyz/aptos-core.git", subdir = "aptos-move/framework/aptos-stdlib", rev = "movement" }
-MoveStdlib = { git = "https://github.com/movementlabsxyz/aptos-core.git", subdir = "aptos-move/framework/move-stdlib", rev = "movement" }
-AptosToken = { git = "https://github.com/movementlabsxyz/aptos-core.git", subdir = "aptos-move/framework/aptos-token", rev = "movement" }
 AptosTokenObjects = { git = "https://github.com/movementlabsxyz/aptos-core.git", subdir = "aptos-move/framework/aptos-token-objects", rev = "movement" }
 
 
 [addresses]
-ticket_nft = "0x07e20f2390f2068039e83d63390c95e62c116b98b1a8b872aa153938d491a6de"
+ticket_nft = "0xca30266bebfc03dd3ddcf003c42c5317cfcbf1584c9a618f4b3ae4c003c0a4a3"

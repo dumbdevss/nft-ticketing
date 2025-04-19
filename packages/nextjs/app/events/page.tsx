@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from 'react';
-import { nanoid } from 'nanoid';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from '~~/components/ui/card';
 import { Badge } from '~~/components/ui/badge';
 import { Button } from '~~/components/ui/button';
@@ -12,6 +11,9 @@ import Navbar from '~~/components/navbar';
 import useSubmitTransaction from '~~/hooks/scaffold-move/useSubmitTransaction';
 import { useWallet } from '@aptos-labs/wallet-adapter-react';
 import { useToast } from '~~/hooks/use-toast';
+import { QRCodeSVG } from 'qrcode.react';
+import { PinataSDK } from "pinata";
+import ReactDOMServer from 'react-dom/server';
 
 // Define TypeScript interfaces
 interface Event {
@@ -21,7 +23,6 @@ interface Event {
   location: string;
   ticketTypes: TicketType[];
   image: string;
-  tokenId: string;
   price: string;
 }
 
@@ -39,17 +40,17 @@ interface Activity {
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [recentActivity, setRecentActivity] = useState<Activity[]>([
-    { action: "Minted", ticket: "Web3 Conference", ticketType: "Transferrable", time: "2 hours ago" },
-    { action: "Transferred", ticket: "ETH Meetup", time: "1 day ago" },
-    { action: "Validated", ticket: "Blockchain Summit", ticketType: "Soulbound", time: "3 days ago" },
-  ]);
   
   const [selectedTicketTypes, setSelectedTicketTypes] = useState<Record<string, string>>({});
 
   const { submitTransaction, transactionResponse, transactionInProcess } = useSubmitTransaction("ticketing");
   const { account } = useWallet();
   const {toast} = useToast();
+  const pinata = new PinataSDK({
+    pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT,
+    pinataGateway: process.env.NEXT_PUBLIC_PINATA_GATEWAY,
+  });
+
 
   useEffect(() => {
     // Check if events exist in localStorage
@@ -68,7 +69,6 @@ export default function EventsPage() {
         { type: "soulbound", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreihagbrmpnhs3pom7h6n44j35ozxcjpfv4bnnqcqlnkmzs3jpjfrvq",
-          tokenId: "1234",
           price: "1 MOVE"
         },
         {
@@ -80,7 +80,6 @@ export default function EventsPage() {
         { type: "soulbound", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreibg7ptr5pstg4ow4iyq2uublhichscosqnhaiepyyv6wudrgr6uxy",
-          tokenId: "5678",
           price: "1 MOVE"
         },
         {
@@ -92,7 +91,6 @@ export default function EventsPage() {
         { type: "transferrable", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreib6wskjwqcumwwaboyptk2awizubpj5jec7yuai45ochb2n6yt5f4",
-          tokenId: "9101",
           price: "1 MOVE"
         },
         {
@@ -105,7 +103,6 @@ export default function EventsPage() {
         { type: "soulbound", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreigmw3cz7lj63763d35bc6656imy2vnllhxgjzwdgwimgzgg4o2k3i",
-          tokenId: "1121",
           price: "1 MOVE"
         },
         {
@@ -118,7 +115,6 @@ export default function EventsPage() {
         { type: "soulbound", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreiejbp6xr2wqryvbi7gl52vtwx7i44fmpn2r6pd2z53ca7dmjmydlq",
-          tokenId: "3141",
           price: "1 MOVE"
         },
       ];
@@ -154,41 +150,79 @@ export default function EventsPage() {
     }));
   };
 
+const generateQRAndUploadToPinataIPFS = async (data: any): Promise<string> => {
+  try {
+    // Create QR code SVG element
+    const qrCodeSvg = (
+      <QRCodeSVG
+        value={typeof data === 'string' ? data : `http://localhost:3000/validate/${data.userAddress}_${data.eventId}`}
+        size={250}
+        level={"H"}
+        includeMargin={true}
+      />
+    );
+    
+    // Convert React element to SVG string
+    const svgString = ReactDOMServer.renderToStaticMarkup(qrCodeSvg);
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+    const svgFile = new File([svgBlob], "qrcode.svg", { type: "image/svg+xml" });
+    
+    const upload = await pinata.upload.public.file(svgFile);
+    let url = `https://${process.env.NEXT_PUBLIC_PINATA_GATEWAY}/ipfs/${upload.cid}`;
+    return url; // Returns the IPFS CID
+  } catch (error) {
+    console.error('Error generating QR code and uploading to IPFS:', error);
+    throw error;
+  }
+};
+
   const handleBuyTicket = async (event: Event) => {
     const selectedType = selectedTicketTypes[event.id];
     const ticketTypeInfo = event.ticketTypes.find(t => t.type === selectedType);
   
     if (!ticketTypeInfo) return;
   
-    // Simulate buying a ticket by adding to recent activity
-    const newActivity = {
-      action: "Minted",
-      ticket: event.name,
-      ticketType: selectedType === "transferrable" ? "Transferrable" : "Soulbound",
-      time: "Just now",
-    };
-  
-    setRecentActivity([newActivity, ...recentActivity.slice(0, 2)]);
-  
-    // Handle NFT minting based on selectedType
-    const transactionType =
-      selectedType === "transferrable"
-        ? "mint_transferable_ticket"
-        : "mint_soulbound_ticket";
-        
-    await submitTransaction(transactionType, [
-      parseInt(event.id),
-      "nothing",
-      `${event.name} ticket for user ${account?.address}`,
-      `${event.image}`,
-    ]);
+    try {
+      // Handle NFT minting based on selectedType
+      const transactionType =
+        selectedType === "transferrable"
+          ? "mint_transferable_ticket"
+          : "mint_soulbound_ticket";
 
-    toast({
-      title: "Purchasing Ticket",
-      description: `Purchasing ${selectedType} ticket for ${event.name} at ${ticketTypeInfo.price}`,
-      duration: 5000,
-    });
+      console.log(event);
+      let qrCodeUrl = await generateQRAndUploadToPinataIPFS({
+        eventId: event.id,
+        userAddress: account?.address,
+      });
+
+      console.log(qrCodeUrl)
+        
+      await submitTransaction(transactionType, [
+        parseInt(event.id),
+        qrCodeUrl,
+        `${event.name} ticket for user ${account?.address}`,
+        `${event.image}`,
+      ]);
+      
+      // Success toast after successful transaction
+      toast({
+        title: "Purchase Successful",
+        description: `Successfully purchased ${selectedType} ticket for ${event.name} at ${ticketTypeInfo.price}`,
+        duration: 5000,
+      });
+      
+    } catch (error) {
+      // Error toast if transaction fails
+      toast({
+        title: "Purchase Failed",
+        description: `Failed to purchase ticket for ${event.name}. Please try again.`,
+        variant: "destructive",
+        duration: 5000,
+      });
+      console.error("Transaction error:", error);
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50">

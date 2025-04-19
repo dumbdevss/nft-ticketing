@@ -2,6 +2,7 @@ import type React from "react"
 import "~~/app/globals.css"
 import { ThemeProvider } from "~~/components/theme-provider"
 import { Toaster } from "~~/components/ui/toaster";
+import {ApolloProviderWrapper} from "~~/components/apollo-wrapper"
 import { ScaffoldMoveAppWithProviders } from "~~/components/ScaffoldMoveAppWithProviders";
 
 export const metadata = {
@@ -20,8 +21,12 @@ export default function RootLayout({
       <body>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <ScaffoldMoveAppWithProviders>
+            <ApolloProviderWrapper>
+
             {children}
             <Toaster />
+
+            </ApolloProviderWrapper>
           </ScaffoldMoveAppWithProviders>
         </ThemeProvider>
       </body>

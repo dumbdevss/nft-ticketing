@@ -47,7 +47,7 @@ async function main() {
   
   if (isCustomNetwork) {
     // Default to move-1 and bytecode-version 6 for custom networks
-    deployCommand += ' --move-1 --bytecode-version 6';
+    deployCommand += ' --bytecode-version 6';
   } else if (overrideMoveVersion) {
     if (overrideMoveVersion === 'move-1') {
       deployCommand += ' --move-1';
