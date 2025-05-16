@@ -36,6 +36,8 @@
     "node": ">=18.17.0"
   },
   "dependencies": {
-    "html5-qrcode": "^2.3.8"
+    "@types/react-dom": "^19.1.2",
+    "html5-qrcode": "^2.3.8",
+    "ipfs-http-client": "^60.0.1"
   }
 }

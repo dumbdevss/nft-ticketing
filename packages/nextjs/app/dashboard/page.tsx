@@ -1,9 +1,81 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~~/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~~/components/ui/tabs"
-import { TicketList } from "~~/components/ticket-list"
-import Navbar from "~~/components/navbar"
+"use client";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~~/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~~/components/ui/tabs";
+import { TicketList } from "~~/components/ticket-list";
+import Navbar from "~~/components/navbar";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useView } from "~~/hooks/scaffold-move/useView";
+
+// Define types for ticket and event
+interface Ticket {
+  event_id: string;
+  is_soulbound: boolean;
+  is_used: boolean;
+  metadata_hash: string;
+  owner: string;
+  purchase_time: string;
+  ticket_id: string;
+  usage_time: string;
+}
+
+interface EnrichedTicket extends Ticket {
+  name: string;
+  date: string;
+  location: string;
+}
+
+interface Event {
+  id: string;
+  name: string;
+  date: string;
+  image: string;
+  location: string;
+}
+
+// Define type for useView hook response
+interface UseViewResponse<T> {
+  data: T | undefined;
+  error: unknown;
+  isLoading: boolean;
+  refetch: () => void;
+}
+
+// Define type for wallet account
+interface WalletAccount {
+  address: string;
+}
 
 export default function DashboardPage() {
+  const { account } = useWallet() as { account: WalletAccount | null };
+
+  const { data, error, isLoading, refetch } = useView({
+    moduleName: "ticketing",
+    functionName: "get_tickets_by_user",
+    args: account?.address ? [`${account.address}`] : [],
+  }) as UseViewResponse<[Ticket[]]>;
+
+  console.log(data)
+
+  // Process tickets to include event details from localStorage
+  const enrichedTickets: EnrichedTicket[] = data?.[0]?.map((ticket: Ticket) => {
+    // Retrieve events from localStorage
+    const events: Event[] = JSON.parse(localStorage.getItem("events") || "[]");
+
+    // Find the event matching the ticket's event_id
+    const event: Event | undefined = events.find((e) => e.id === ticket.event_id);
+
+    return {
+      ...ticket,
+      name: event?.name || "Unknown Event",
+      date: event?.date || "Unknown Date",
+      location: event?.location || "Unknown Location",
+      image: event?.image
+    };
+  }) || [];
+
+  localStorage.setItem(`tickets-${account?.address}`, JSON.stringify(enrichedTickets));
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pb-12">
       <Navbar />
@@ -16,7 +88,7 @@ export default function DashboardPage() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Tickets</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">12</div>
+              <div className="text-3xl font-bold">{enrichedTickets.length}</div>
             </CardContent>
           </Card>
           <Card>
@@ -24,7 +96,9 @@ export default function DashboardPage() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Transferrable</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">8</div>
+              <div className="text-3xl font-bold">
+                {enrichedTickets.filter((ticket) => !ticket.is_soulbound).length}
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -32,7 +106,9 @@ export default function DashboardPage() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Soulbound</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">4</div>
+              <div className="text-3xl font-bold">
+                {enrichedTickets.filter((ticket) => ticket.is_soulbound).length}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -52,13 +128,13 @@ export default function DashboardPage() {
                     <TabsTrigger value="soulbound">Soulbound</TabsTrigger>
                   </TabsList>
                   <TabsContent value="all">
-                    <TicketList filter="all" />
+                    <TicketList tickets={enrichedTickets} />
                   </TabsContent>
                   <TabsContent value="transferrable">
-                    <TicketList filter="transferrable" />
+                    <TicketList tickets={enrichedTickets.filter((ticket) => !ticket.is_soulbound)} />
                   </TabsContent>
                   <TabsContent value="soulbound">
-                    <TicketList filter="soulbound" />
+                    <TicketList tickets={enrichedTickets.filter((ticket) => ticket.is_soulbound)} />
                   </TabsContent>
                 </Tabs>
               </CardContent>
@@ -67,6 +143,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

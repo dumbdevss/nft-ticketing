@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from 'react';
-import { nanoid } from 'nanoid';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from '~~/components/ui/card';
 import { Badge } from '~~/components/ui/badge';
 import { Button } from '~~/components/ui/button';
@@ -9,6 +8,12 @@ import { RadioGroup, RadioGroupItem } from '~~/components/ui/radio-group';
 import { Label } from '~~/components/ui/label';
 import Image from 'next/image';
 import Navbar from '~~/components/navbar';
+import useSubmitTransaction from '~~/hooks/scaffold-move/useSubmitTransaction';
+import { useWallet } from '@aptos-labs/wallet-adapter-react';
+import { useToast } from '~~/hooks/use-toast';
+import { QRCodeSVG } from 'qrcode.react';
+import { PinataSDK } from "pinata";
+import ReactDOMServer from 'react-dom/server';
 
 // Define TypeScript interfaces
 interface Event {
@@ -18,7 +23,6 @@ interface Event {
   location: string;
   ticketTypes: TicketType[];
   image: string;
-  tokenId: string;
   price: string;
 }
 
@@ -36,13 +40,17 @@ interface Activity {
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [recentActivity, setRecentActivity] = useState<Activity[]>([
-    { action: "Minted", ticket: "Web3 Conference", ticketType: "Transferrable", time: "2 hours ago" },
-    { action: "Transferred", ticket: "ETH Meetup", time: "1 day ago" },
-    { action: "Validated", ticket: "Blockchain Summit", ticketType: "Soulbound", time: "3 days ago" },
-  ]);
   
   const [selectedTicketTypes, setSelectedTicketTypes] = useState<Record<string, string>>({});
+
+  const { submitTransaction, transactionResponse, transactionInProcess } = useSubmitTransaction("ticketing");
+  const { account } = useWallet();
+  const {toast} = useToast();
+  const pinata = new PinataSDK({
+    pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT,
+    pinataGateway: process.env.NEXT_PUBLIC_PINATA_GATEWAY,
+  });
+
 
   useEffect(() => {
     // Check if events exist in localStorage
@@ -52,40 +60,37 @@ export default function EventsPage() {
       // Create dummy events if none exist
       const dummyEvents: Event[] = [
         {
-          id:"1",
+          id: "1",
           name: "Web3 Conference 2025",
           date: "May 15, 2025",
           location: "San Francisco, CA",
           ticketTypes: [
-            { type: "transferrable", price: "1 MOVE" },
-            { type: "soulbound", price: "1 MOVE" }
+        { type: "transferrable", price: "1 MOVE" },
+        { type: "soulbound", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreihagbrmpnhs3pom7h6n44j35ozxcjpfv4bnnqcqlnkmzs3jpjfrvq",
-          tokenId: "1234",
           price: "1 MOVE"
         },
         {
-          id:"2",
+          id: "2",
           name: "Blockchain Summit",
           date: "June 22, 2025",
           location: "New York, NY",
           ticketTypes: [
-            { type: "soulbound", price: "1 MOVE" }
+        { type: "soulbound", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreibg7ptr5pstg4ow4iyq2uublhichscosqnhaiepyyv6wudrgr6uxy",
-          tokenId: "5678",
           price: "1 MOVE"
         },
         {
-          id:"3",
+          id: "3",
           name: "ETH Global Hackathon",
           date: "July 10, 2025",
           location: "Berlin, Germany",
           ticketTypes: [
-            { type: "transferrable", price: "1 MOVE" }
+        { type: "transferrable", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreib6wskjwqcumwwaboyptk2awizubpj5jec7yuai45ochb2n6yt5f4",
-          tokenId: "9101",
           price: "1 MOVE"
         },
         {
@@ -94,24 +99,22 @@ export default function EventsPage() {
           date: "August 5, 2025",
           location: "Singapore",
           ticketTypes: [
-            { type: "transferrable", price: "1 MOVE" },
-            { type: "soulbound", price: "1 MOVE" }
+        { type: "transferrable", price: "1 MOVE" },
+        { type: "soulbound", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreigmw3cz7lj63763d35bc6656imy2vnllhxgjzwdgwimgzgg4o2k3i",
-          tokenId: "1121",
           price: "1 MOVE"
         },
         {
-          id:"5",
+          id: "5",
           name: "NFT Exhibition",
           date: "September 18, 2025",
           location: "London, UK",
           ticketTypes: [
-            { type: "transferrable", price: "1 MOVE" },
-            { type: "soulbound", price: "1 MOVE" }
+        { type: "transferrable", price: "1 MOVE" },
+        { type: "soulbound", price: "1 MOVE" }
           ],
           image: "https://copper-fashionable-dolphin-815.mypinata.cloud/ipfs/bafkreiejbp6xr2wqryvbi7gl52vtwx7i44fmpn2r6pd2z53ca7dmjmydlq",
-          tokenId: "3141",
           price: "1 MOVE"
         },
       ];
@@ -147,25 +150,79 @@ export default function EventsPage() {
     }));
   };
 
-  const handleBuyTicket = (event: Event) => {
+const generateQRAndUploadToPinataIPFS = async (data: any): Promise<string> => {
+  try {
+    // Create QR code SVG element
+    const qrCodeSvg = (
+      <QRCodeSVG
+        value={typeof data === 'string' ? data : `http://localhost:3000/validate/${data.userAddress}_${data.eventId}`}
+        size={250}
+        level={"H"}
+        includeMargin={true}
+      />
+    );
+    
+    // Convert React element to SVG string
+    const svgString = ReactDOMServer.renderToStaticMarkup(qrCodeSvg);
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+    const svgFile = new File([svgBlob], "qrcode.svg", { type: "image/svg+xml" });
+    
+    const upload = await pinata.upload.public.file(svgFile);
+    let url = `https://${process.env.NEXT_PUBLIC_PINATA_GATEWAY}/ipfs/${upload.cid}`;
+    return url; // Returns the IPFS CID
+  } catch (error) {
+    console.error('Error generating QR code and uploading to IPFS:', error);
+    throw error;
+  }
+};
+
+  const handleBuyTicket = async (event: Event) => {
     const selectedType = selectedTicketTypes[event.id];
     const ticketTypeInfo = event.ticketTypes.find(t => t.type === selectedType);
-    
+  
     if (!ticketTypeInfo) return;
-    
-    // Simulate buying a ticket by adding to recent activity
-    const newActivity = {
-      action: "Minted",
-      ticket: event.name,
-      ticketType: selectedType === 'transferrable' ? 'Transferrable' : 'Soulbound',
-      time: "Just now"
-    };
+  
+    try {
+      // Handle NFT minting based on selectedType
+      const transactionType =
+        selectedType === "transferrable"
+          ? "mint_transferable_ticket"
+          : "mint_soulbound_ticket";
 
-    setRecentActivity([newActivity, ...recentActivity.slice(0, 2)]);
+      console.log(event);
+      let qrCodeUrl = await generateQRAndUploadToPinataIPFS({
+        eventId: event.id,
+        userAddress: account?.address,
+      });
 
-    // You would also handle the actual NFT minting here
-    alert(`Purchasing ${selectedType} ticket for ${event.name} at ${ticketTypeInfo.price}`);
+      console.log(qrCodeUrl)
+        
+      await submitTransaction(transactionType, [
+        parseInt(event.id),
+        qrCodeUrl,
+        `${event.name} ticket for user ${account?.address}`,
+        `${event.image}`,
+      ]);
+      
+      // Success toast after successful transaction
+      toast({
+        title: "Purchase Successful",
+        description: `Successfully purchased ${selectedType} ticket for ${event.name} at ${ticketTypeInfo.price}`,
+        duration: 5000,
+      });
+      
+    } catch (error) {
+      // Error toast if transaction fails
+      toast({
+        title: "Purchase Failed",
+        description: `Failed to purchase ticket for ${event.name}. Please try again.`,
+        variant: "destructive",
+        duration: 5000,
+      });
+      console.error("Transaction error:", error);
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
