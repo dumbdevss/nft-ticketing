@@ -104,7 +104,7 @@ export default function TicketPage() {
         setOnChainNftData(nft_data);
       }
 
-      const storedTickets = localStorage.getItem("tickets");
+      const storedTickets = localStorage.getItem(`tickets-${account?.address}`);
       const parsedTickets: Ticket[] = storedTickets ? JSON.parse(storedTickets) : [];
       setTickets(parsedTickets);
 

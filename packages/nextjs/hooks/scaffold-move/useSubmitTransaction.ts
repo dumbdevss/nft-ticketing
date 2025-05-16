@@ -62,7 +62,6 @@ const useSubmitTransaction = <TModuleName extends ModuleName>(moduleName: TModul
         functionArguments: processArguments(args || []),
       },
     };
-    console.log("transaction", transaction);
 
     setTransactionInProcess(true);
     const signAndSubmitTransactionCall = async (transaction: InputTransactionData): Promise<TransactionResponse> => {
@@ -105,7 +104,12 @@ const useSubmitTransaction = <TModuleName extends ModuleName>(moduleName: TModul
       return responseOnError;
     };
 
-    await signAndSubmitTransactionCall(transaction).then(setTransactionResponse);
+   const transactionResponse = await signAndSubmitTransactionCall(transaction);
+    setTransactionResponse(transactionResponse);
+
+    let responseMessage = transactionResponse as TransactionResponseOnSubmission;
+    // Return the transaction hash if available
+    return responseMessage.transactionHash;
   }
 
   function clearTransactionResponse() {

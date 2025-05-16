@@ -74,7 +74,7 @@ export default function DashboardPage() {
     };
   }) || [];
 
-  localStorage.setItem("tickets", JSON.stringify(enrichedTickets));
+  localStorage.setItem(`tickets-${account?.address}`, JSON.stringify(enrichedTickets));
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pb-12">
