@@ -39,28 +39,9 @@ interface Params {
   id: string;
 }
 
-// GraphQL query for fetching user NFTs
+// TODO 7: define the graphql to get user nfts from the indexer
 const GET_USER_NFTS_QUERY = gql`
-  query GetUserNFTs {
-    current_token_ownerships_v2(
-      where: {owner_address: {_eq: "0xe1bb2c18a8caf0736c27eb33f8dc42cd060b4169ce4c225f5763e5810176b4d8"}, amount: {_gt: 0}, is_fungible_v2: {}, current_token_data: {current_collection: {collection_name: {_eq: "Event Tickets"}}}}
-    ) {
-      token_data_id
-      amount
-      current_token_data: current_token_data {
-        token_name
-        token_uri
-        token_properties
-        collection_id
-        current_collection: current_collection {
-          collection_name
-          description
-          uri
-          creator_address
-        }
-      }
-    }
-  }
+  
 `;
 
 export default function TicketPage() {

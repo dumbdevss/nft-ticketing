@@ -144,13 +144,14 @@ module ticket_nft::ticketing {
         state.ticket_counter = state.ticket_counter + 1;
     }
 
-   // TODOs 8: create a function to mint a transferable ticket. It should:
-    // - Check if the user has enough APT
-    // - Create the ticket under the resource account
-    // - Store the TicketInfo under the token's address
-    // - Store the token address in the TicketState
-    // - Emit a mint event
-    // - Transfer the token to the user
+   /*  TODOs 8: create a function to mint a transferable ticket. It should:
+     - Check if the user has enough APT
+     - Create the ticket under the resource account
+     - Store the TicketInfo under the token's address
+     - Store the token address in the TicketState
+     - Emit a mint event
+     - Transfer the token to the user
+    */
     public entry fun mint_transferable_ticket(
         user: &signer,
         event_id: u64,

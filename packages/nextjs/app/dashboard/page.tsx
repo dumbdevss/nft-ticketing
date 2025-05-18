@@ -41,29 +41,34 @@ interface UseViewResponse<T> {
   refetch: () => void;
 }
 
-// Define type for wallet account
-interface WalletAccount {
-  address: string;
-}
+// TODOs 1: define a WalletAccount type
 
 export default function DashboardPage() {
-  const { account } = useWallet() as { account: WalletAccount | null };
+  // TODOs 2: use useWallet hook to get the user wallet conencted and the wallet address
+  const { account } = { address: '@0x0' } // WalletAccount used here
 
-  const { data, error, isLoading, refetch } = useView({
-    moduleName: "ticketing",
-    functionName: "get_tickets_by_user",
-    args: account?.address ? [`${account.address}`] : [],
-  }) as UseViewResponse<[Ticket[]]>;
+  // TODO 3: using useView hook get the user tickets using get_tickets_by_user view function
+  const { data, error, isLoading, refetch } = {
+    data: [[]],
+    error: "",
+    isLoading: false,
+    refetch: () => {},
+  }
 
-  console.log(data)
 
-  // Process tickets to include event details from localStorage
+  // TODOs 4: get the reformated data of the user tickts 
   const enrichedTickets: EnrichedTicket[] = data?.[0]?.map((ticket: Ticket) => {
     // Retrieve events from localStorage
-    const events: Event[] = JSON.parse(localStorage.getItem("events") || "[]");
 
     // Find the event matching the ticket's event_id
-    const event: Event | undefined = events.find((e) => e.id === ticket.event_id);
+    
+    // dummy data to remove
+    let event = {
+      name: "NFT conference",
+      date: "",
+      location: "",
+      image: ""
+    }
 
     return {
       ...ticket,

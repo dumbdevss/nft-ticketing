@@ -46,10 +46,9 @@ export default function EventsPage() {
   const { submitTransaction, transactionResponse, transactionInProcess } = useSubmitTransaction("ticketing");
   const { account } = useWallet();
   const {toast} = useToast();
-  const pinata = new PinataSDK({
-    pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT,
-    pinataGateway: process.env.NEXT_PUBLIC_PINATA_GATEWAY,
-  });
+
+  // TODOs 5: create a pinata client using pinata_jwt and pinata_gateway
+  const pinata: any = null;
 
 
   useEffect(() => {
@@ -150,25 +149,16 @@ export default function EventsPage() {
     }));
   };
 
+// TODOs 5: generate the QRCODE and upload the QRCODE to pinata
 const generateQRAndUploadToPinataIPFS = async (data: any): Promise<string> => {
   try {
     // Create QR code SVG element
-    const qrCodeSvg = (
-      <QRCodeSVG
-        value={typeof data === 'string' ? data : `http://localhost:3000/validate/${data.userAddress}_${data.eventId}`}
-        size={250}
-        level={"H"}
-        includeMargin={true}
-      />
-    );
     
     // Convert React element to SVG string
-    const svgString = ReactDOMServer.renderToStaticMarkup(qrCodeSvg);
-    const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
-    const svgFile = new File([svgBlob], "qrcode.svg", { type: "image/svg+xml" });
     
-    const upload = await pinata.upload.public.file(svgFile);
-    let url = `https://${process.env.NEXT_PUBLIC_PINATA_GATEWAY}/ipfs/${upload.cid}`;
+    // upload to pinata and return url to the image on pinata
+   
+    let url = ``;
     return url; // Returns the IPFS CID
   } catch (error) {
     console.error('Error generating QR code and uploading to IPFS:', error);
@@ -176,6 +166,7 @@ const generateQRAndUploadToPinataIPFS = async (data: any): Promise<string> => {
   }
 };
 
+  // TODO 6: implement a function to buy ticket
   const handleBuyTicket = async (event: Event) => {
     const selectedType = selectedTicketTypes[event.id];
     const ticketTypeInfo = event.ticketTypes.find(t => t.type === selectedType);
@@ -184,42 +175,15 @@ const generateQRAndUploadToPinataIPFS = async (data: any): Promise<string> => {
   
     try {
       // Handle NFT minting based on selectedType
-      const transactionType =
-        selectedType === "transferrable"
-          ? "mint_transferable_ticket"
-          : "mint_soulbound_ticket";
 
-      console.log(event);
-      let qrCodeUrl = await generateQRAndUploadToPinataIPFS({
-        eventId: event.id,
-        userAddress: account?.address,
-      });
+     // pinata url for the qrcode using generateQRAndUploadToPinataIPFS function
 
-      console.log(qrCodeUrl)
-        
-      await submitTransaction(transactionType, [
-        parseInt(event.id),
-        qrCodeUrl,
-        `${event.name} ticket for user ${account?.address}`,
-        `${event.image}`,
-      ]);
+      // submit the transaction based on the selectedType using submitTransaction hook
       
       // Success toast after successful transaction
-      toast({
-        title: "Purchase Successful",
-        description: `Successfully purchased ${selectedType} ticket for ${event.name} at ${ticketTypeInfo.price}`,
-        duration: 5000,
-      });
       
     } catch (error) {
       // Error toast if transaction fails
-      toast({
-        title: "Purchase Failed",
-        description: `Failed to purchase ticket for ${event.name}. Please try again.`,
-        variant: "destructive",
-        duration: 5000,
-      });
-      console.error("Transaction error:", error);
     }
   };
 
